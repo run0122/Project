@@ -16,8 +16,8 @@ while True:
     height, width, channels = frame.shape
 
     # 중앙에 위치한 영역 추출하기
-    crop_width = int(width/4)
-    crop_height = int(height/4)
+    crop_width = int(3*width/8)
+    crop_height = int(3*height/8)
     start_x = int(width/2) - crop_width
     start_y = int(height/2) - crop_height
     end_x = int(width/2) + crop_width
@@ -54,14 +54,14 @@ while True:
             cv2.circle(thresh, (cx, cy), 5, (0, 0, 255), -1)
 
             # 중심점 정보 시리얼 통신으로 전송하기
-            # if cx < 300:
-            #     ser.write(b'L')
-            # elif cx > 340:
-            #     ser.write(b'R')
-            # else:
-            #     ser.write(b'F')
+            if cx < 150:
+                ser.write(b'L')
+            elif cx > 170:
+                ser.write(b'R')
+            else:
+                ser.write(b'F')
 
-            print("Center point: ({}, {})".format(cx, cy))
+            # print("Center point: ({}, {})".format(cx, cy))
 
     # 프레임 보여주기
     cv2.imshow("Line Tracer", thresh)
