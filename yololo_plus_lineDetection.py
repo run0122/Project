@@ -93,6 +93,7 @@ while True:
                 ser.write(b'L')
             elif cx > 170:
                 ser.write(b'R')
+         
             else:
                 ser.write(b'F')
 
