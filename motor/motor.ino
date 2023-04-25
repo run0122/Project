@@ -28,10 +28,24 @@ void loop() {
   
   if (Serial.available() > 0) {
     char input = Serial.read();
-    if (input == 'S') {
+    if (input == 'S') {             // 보행자 있
       stop();
-    } else if (input == 'F') {
+    } else if (input == 'F') {      // 보행자 없
       drive();
+    }
+    // if(IR_L_data == 0 and IR_M_data == 0 and IR_R_data == 0){
+    //   if(input == 'L'){
+    //     left();
+    //   }
+    //   else if(input == 'R'){
+    //     right();
+    //   }
+    // }
+    if(input == 'L'){
+      left();
+    }
+    else if(input == 'R'){
+      right();
     }
   }
 }
