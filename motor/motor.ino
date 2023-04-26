@@ -25,27 +25,31 @@ void loop() {
   IR_L_data = digitalRead(IR_L);
   IR_M_data = digitalRead(IR_M);
   IR_R_data = digitalRead(IR_R);
-  
+
+  Serial.print(IR_L_data);
+  Serial.print("-");
+  Serial.print(IR_M_data);
+  Serial.print("-");
+  Serial.println(IR_R_data);
+
   if (Serial.available() > 0) {
     char input = Serial.read();
-    if (input == 'S') {             // 보행자 있
-      stop();
-    } else if (input == 'F') {      // 보행자 없
-      drive();
+
+    if (IR_L_data == 1 or IR_M_data == 1 or IR_R_data == 1) {
+      if (input == 'D') {  // 보행자가 없을 때는 정상 IR 센서 동작
+        drive();
+      } else if (input == 'T') {  // 보행자가 있을 때는 Turn 함수 호출 -> IR센서 값이 0 0 0
+        turn();
+      }
     }
-    // if(IR_L_data == 0 and IR_M_data == 0 and IR_R_data == 0){
-    //   if(input == 'L'){
-    //     left();
-    //   }
-    //   else if(input == 'R'){
-    //     right();
-    //   }
-    // }
-    if(input == 'L'){
-      left();
-    }
-    else if(input == 'R'){
-      right();
+    else if (IR_L_data == 0 and IR_M_data == 0 and IR_R_data == 0) {       // 라인을 벗어낫을 때
+      if (input == 'L') {
+        left();
+      } else if (input == 'R') {
+        right();
+      } else if (input == 'F') {
+        forward();
+      }
     }
   }
 }
@@ -53,20 +57,17 @@ void loop() {
 void drive() {
   if (IR_L_data == 0 and IR_M_data == 1 and IR_R_data == 0) {
     forward();
-  }
-  else if (IR_L_data == 1 and IR_M_data == 0 and IR_R_data == 0) {
+  } else if (IR_L_data == 1 and IR_M_data == 0 and IR_R_data == 0) {
     left();
-  }
-  else if (IR_L_data == 0 and IR_M_data == 0 and IR_R_data == 1) {
+  } else if (IR_L_data == 0 and IR_M_data == 0 and IR_R_data == 1) {
     right();
-  }
-  else if (IR_L_data == 1  and IR_R_data == 1) {
+  } else if (IR_L_data == 1 and IR_R_data == 1) {
     stop();
   }
 }
 
-void right () {
-  //우
+void right() {
+  delay(15);
   digitalWrite(motor_A1, HIGH);
   digitalWrite(motor_A2, LOW);
   digitalWrite(motor_B1, LOW);
@@ -74,7 +75,7 @@ void right () {
 }
 
 void left() {
-  //좌
+  delay(15);
   digitalWrite(motor_A1, LOW);
   digitalWrite(motor_A2, LOW);
   digitalWrite(motor_B1, HIGH);
@@ -82,6 +83,7 @@ void left() {
 }
 
 void forward() {
+  delay(15);
   digitalWrite(motor_A1, HIGH);
   digitalWrite(motor_A2, LOW);
   digitalWrite(motor_B1, HIGH);
@@ -89,7 +91,7 @@ void forward() {
 }
 
 void backward() {
-  //후진
+  delay(15);
   digitalWrite(motor_A1, LOW);
   digitalWrite(motor_A2, HIGH);
   digitalWrite(motor_B1, LOW);
@@ -97,8 +99,18 @@ void backward() {
 }
 
 void stop() {
+  delay(15);
   digitalWrite(motor_A1, LOW);
   digitalWrite(motor_A2, LOW);
   digitalWrite(motor_B1, LOW);
   digitalWrite(motor_B2, LOW);
+}
+
+void turn() {
+  right();
+  delay(500);
+  forward();
+  delay(500);
+  left();
+  delay(500);
 }

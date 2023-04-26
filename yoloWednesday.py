@@ -3,9 +3,9 @@ import numpy as np
 import torch
 import serial
 
-model = torch.hub.load('ultralytics/yolov5', 'yolov5s', pretrained=True)
-
 ser = serial.Serial('COM4', 9600)
+
+model = torch.hub.load('ultralytics/yolov5', 'yolov5s', pretrained=True)
 
 cap = cv2.VideoCapture(0)  # 0번 카메라 연결
 while True:
@@ -44,28 +44,26 @@ while True:
         avg_cy = int(np.mean(cy_list))
 
         # 중심점 정보 시리얼 통신으로 전송하기
-        if avg_cx < 160:
-            ser.write(b'R')
-        elif avg_cx > 480:
-            ser.write(b'L')
-        else:
-            ser.write(b'D')
+        if avg_cx > 160 and avg_cx <480:
+            ser.write(b'T')        
 
         cv2.circle(frame, (avg_cx, avg_cy), 5, (255, 0, 0), -1)
 
         print("Average Center point: ({}, {})".format(avg_cx, avg_cy))
+    
+    else:           
+        ser.write(b'D')
 
     cv2.imshow('YOLOv5', frame)  # 화면에 프레임을 출력합니다.
 
-    # 프레임의 가로와 세로 크기 구하기
     height, width, channels = frame.shape
 
     # 하단부 중앙 1/2 영역 추출하기
-    crop_width = int(width/4)
-    crop_height = int(height/2)
-    start_x = int(width/2) - crop_width
-    start_y = int(height/2)
-    end_x = int(width/2) + crop_width
+    crop_width = int(width / 4)
+    crop_height = int(height / 2)
+    start_x = int(width / 2) - crop_width
+    start_y = int(height / 2)
+    end_x = int(width / 2) + crop_width
     end_y = height
     cropped_frame = frame[start_y:end_y, start_x:end_x]
 
@@ -99,14 +97,12 @@ while True:
             cv2.circle(thresh, (cx, cy), 5, (0, 0, 255), -1)
 
             # 중심점 정보 시리얼 통신으로 전송하기
-            if cx < 150:
-                ser.write(b'J')
-            elif cx > 170:
-                ser.write(b'W')
+            if cx < 140:
+                ser.write(b'L')
+            elif cx > 180:
+                ser.write(b'R')
             else:
-                ser.write(b'D')
-
-            # print("Center point: ({}, {})".format(cx, cy))
+                ser.write(b'F')
 
     # 프레임 보여주기
     cv2.imshow("Line Tracer", thresh)
