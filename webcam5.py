@@ -6,6 +6,8 @@ ser = serial.Serial('COM4', 9600)
 
 cap = cv2.VideoCapture(0)
 
+MIN_CONTOUR_AREA = 500 
+
 while True:
     # 프레임 읽어들이기
     ret, frame = cap.read()
@@ -39,7 +41,7 @@ while True:
     max_contour = None
     for contour in contours:
         area = cv2.contourArea(contour)
-        if area > max_area:
+        if area > max_area and area > MIN_CONTOUR_AREA:
             max_area = area
             max_contour = contour
 
@@ -52,6 +54,10 @@ while True:
 
             # 중심점 그리기
             cv2.circle(thresh, (cx, cy), 5, (0, 0, 255), -1)
+
+            # 바운딩 박스 그리기
+            x, y, w, h = cv2.boundingRect(max_contour)
+            cv2.rectangle(thresh, (x, y), (x + w, y + h), (0, 255, 0), 2)
 
             # 중심점 정보 시리얼 통신으로 전송하기
             if cx < 150:

@@ -9,9 +9,6 @@ int IR_L_data;
 int IR_M_data;
 int IR_R_data;
 
-unsigned long last_time = 0;
-const unsigned long interval = 500;
-
 char input;
 
 void setup() {
@@ -26,16 +23,9 @@ void setup() {
 }
 
 void loop() {
-  //IR 센서 값을 읽어 출력해주는 코드
   IR_L_data = digitalRead(IR_L);
   IR_M_data = digitalRead(IR_M);
   IR_R_data = digitalRead(IR_R);
-
-  Serial.print(IR_L_data);
-  Serial.print("-");
-  Serial.print(IR_M_data);
-  Serial.print("-");
-  Serial.println(IR_R_data);
 
   bool is_turned = false;
 
@@ -45,12 +35,8 @@ void loop() {
     if (IR_L_data == 1 or IR_M_data == 1 or IR_R_data == 1) {
       if (input == 'D') {  // 보행자가 없을 때는 정상 IR 센서 동작
         drive();
-        is_turned = false;
       } else if (input == 'T') {  // 보행자가 있을 때는 Turn 함수 호출 -> IR센서 값이 0 0 0
-        if (is_turned == false) {
-          turn();
-          is_turned = true;
-        }
+        stop();
       }
     } else if (IR_L_data == 0 and IR_M_data == 0 and IR_R_data == 0) {  // 라인을 벗어낫을 때
       if (input == 'L') {
@@ -77,31 +63,27 @@ void drive() {
 }
 
 void right() {
-  delay(15);
-  digitalWrite(motor_A1, HIGH);
+  analogWrite(motor_A1, 255);
   digitalWrite(motor_A2, LOW);
-  digitalWrite(motor_B1, LOW);
+  analogWrite(motor_B1, 220);
   digitalWrite(motor_B2, LOW);
 }
 
 void left() {
-  delay(15);
-  digitalWrite(motor_A1, LOW);
+  analogWrite(motor_A1, 220);
   digitalWrite(motor_A2, LOW);
-  digitalWrite(motor_B1, HIGH);
+  analogWrite(motor_B1, 255);
   digitalWrite(motor_B2, LOW);
 }
 
 void forward() {
-  delay(15);
-  digitalWrite(motor_A1, HIGH);
+  analogWrite(motor_A1, 255);
   digitalWrite(motor_A2, LOW);
-  digitalWrite(motor_B1, HIGH);
+  analogWrite(motor_B1, 255);
   digitalWrite(motor_B2, LOW);
 }
 
 void backward() {
-  delay(15);
   digitalWrite(motor_A1, LOW);
   digitalWrite(motor_A2, HIGH);
   digitalWrite(motor_B1, LOW);
@@ -109,7 +91,6 @@ void backward() {
 }
 
 void stop() {
-  delay(15);
   digitalWrite(motor_A1, LOW);
   digitalWrite(motor_A2, LOW);
   digitalWrite(motor_B1, LOW);

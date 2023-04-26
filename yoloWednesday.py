@@ -44,6 +44,7 @@ while True:
 
     # person 객체가 감지되지 않은 경우
     if not person_detected:
+        print('D1')
         ser.write(b'D')  # D 신호를 보냅니다.
     # person 객체가 감지된 경우
     else:
@@ -54,8 +55,10 @@ while True:
 
             # 중심점 정보 시리얼 통신으로 전송하기
             if avg_cx > 160 and avg_cx < 480:
+                print('T')
                 ser.write(b'T')
             else:
+                print('D')
                 ser.write(b'D')
                 
             cv2.circle(frame, (avg_cx, avg_cy), 5, (255, 0, 0), -1)
@@ -80,11 +83,10 @@ while True:
     gray = cv2.cvtColor(cropped_frame, cv2.COLOR_BGR2GRAY)
 
     # 이미지 이진화하기
-    _, thresh = cv2.threshold(gray, 127, 255, cv2.THRESH_BINARY_INV)
+    _, thresh = cv2.threshold(gray, 90, 255, cv2.THRESH_BINARY_INV)
 
     # 컨투어 찾기
-    contours, _ = cv2.findContours(
-        thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
     # 컨투어 중 가장 큰 영역 찾기
     max_area = 0
@@ -107,12 +109,19 @@ while True:
 
             # 중심점 정보 시리얼 통신으로 전송하기
             if cx < 140:
+                print('L')
                 ser.write(b'L')
             elif cx > 180:
+                print('R')
                 ser.write(b'R')
             else:
+                print('F')
                 ser.write(b'F')
-
+    
+    elif max_contour is None:
+        print("D2")
+        ser.write(b'D')
+    
     # 프레임 보여주기
     cv2.imshow("Line Tracer", thresh)
 
