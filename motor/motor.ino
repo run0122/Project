@@ -9,6 +9,11 @@ int IR_L_data;
 int IR_M_data;
 int IR_R_data;
 
+unsigned long last_time = 0;
+const unsigned long interval = 500;
+
+char input;
+
 void setup() {
   pinMode(motor_A1, OUTPUT);
   pinMode(motor_A2, OUTPUT);
@@ -32,17 +37,22 @@ void loop() {
   Serial.print("-");
   Serial.println(IR_R_data);
 
+  bool is_turned = false;
+
   if (Serial.available() > 0) {
-    char input = Serial.read();
+    input = Serial.read();
 
     if (IR_L_data == 1 or IR_M_data == 1 or IR_R_data == 1) {
       if (input == 'D') {  // 보행자가 없을 때는 정상 IR 센서 동작
         drive();
+        is_turned = false;
       } else if (input == 'T') {  // 보행자가 있을 때는 Turn 함수 호출 -> IR센서 값이 0 0 0
-        turn();
+        if (is_turned == false) {
+          turn();
+          is_turned = true;
+        }
       }
-    }
-    else if (IR_L_data == 0 and IR_M_data == 0 and IR_R_data == 0) {       // 라인을 벗어낫을 때
+    } else if (IR_L_data == 0 and IR_M_data == 0 and IR_R_data == 0) {  // 라인을 벗어낫을 때
       if (input == 'L') {
         left();
       } else if (input == 'R') {
@@ -107,10 +117,41 @@ void stop() {
 }
 
 void turn() {
-  right();
-  delay(500);
-  forward();
-  delay(500);
-  left();
-  delay(500);
+  milliright(500);
+  milliforward(500);
+  millileft(500);
+}
+
+void milliright(unsigned long x){
+  unsigned long current_time = millis();
+  unsigned long interval = x;
+  while (millis() - current_time < interval) { // 현재 시간과의 차가 500 밀리초 미만일 때까지 오른쪽으로 회전합니다.
+    right();
+    if (Serial.available() > 0 && Serial.read() == 'D') {
+      stop(); // D신호가 오면 모터를 멈추고 함수 종료
+      return;
+    }
+  }
+}
+void millileft(unsigned long x){
+  unsigned long current_time = millis();
+  unsigned long interval = x;
+  while (millis() - current_time < interval) { // 현재 시간과의 차가 500 밀리초 미만일 때까지 오른쪽으로 회전합니다.
+    left();
+    if (Serial.available() > 0 && Serial.read() == 'D') {
+      stop(); // D신호가 오면 모터를 멈추고 함수 종료
+      return;
+    }
+  }
+}
+void milliforward(unsigned long x){
+  unsigned long current_time = millis();
+  unsigned long interval = x;
+  while (millis() - current_time < interval) { // 현재 시간과의 차가 500 밀리초 미만일 때까지 오른쪽으로 회전합니다.
+    forward();
+    if (Serial.available() > 0 && Serial.read() == 'D') {
+      stop(); // D신호가 오면 모터를 멈추고 함수 종료
+      return;
+    }
+  }
 }
